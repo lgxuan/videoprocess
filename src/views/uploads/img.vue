@@ -2,25 +2,25 @@
   <el-card shadow="never">
     <template #header>
       <div class="card-header">
-        <span class="font-medium"> 视频上传 </span>
+        <span class="font-medium"> 图片上传 </span>
       </div>
     </template>
     <el-upload
       class="upload-demo"
       drag
-      :action="flaskApi('upload')"
+      :action="flaskApi('upload_image')"
       :headers="headers"
       :on-success="succ"
       multiple
       :show-file-list="false"
-      accept=".mp4"
+      accept=".jpg"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
       <div class="el-upload__text">
         可以将文件直接拖到这里 <em>或点击上传</em>
       </div>
       <template #tip>
-        <div class="el-upload__tip">上传视频,格式为mp4</div>
+        <div class="el-upload__tip">上传视频,格式为jpg</div>
       </template>
     </el-upload>
   </el-card>

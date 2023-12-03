@@ -32,7 +32,7 @@ export const useUserStore = defineStore({
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(data => {
-            if (data['success']) {
+            if (data["success"]) {
               setToken(data.data);
             }
             resolve(data);
@@ -56,7 +56,7 @@ export const useUserStore = defineStore({
       return new Promise<RefreshTokenResult>((resolve, reject) => {
         refreshTokenApi(data)
           .then(data => {
-            if (data['success']) {
+            if (data["success"]) {
               setToken(data.data);
               resolve(data);
             } else {

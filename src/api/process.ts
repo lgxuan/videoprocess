@@ -26,10 +26,15 @@ export type videoProgress = {
   }>;
 };
 
-
 export const setres = (data?: object) => {
-  return http.request<VideoProcessResponse>("post", flaskApi("videoProcess/set"), { data });
+  return http.request<VideoProcessResponse>(
+    "post",
+    flaskApi("videoProcess/set"),
+    { data }
+  );
 };
 export const prores = (data?: object) => {
-  return http.request<videoProgress>("post", flaskApi("videoProcess/result"), { data });
+  return http.request<videoProgress>("post", flaskApi("videoProcess/result"), {
+    data
+  });
 };

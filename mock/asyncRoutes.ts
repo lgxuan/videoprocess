@@ -17,7 +17,7 @@ const videoRouter = {
   children: [
     {
       path: "/process/index",
-      name: "videoprocess",
+      name: "process",
       meta: {
         title: "视频处理",
         roles: ["admin", "common"]
@@ -28,15 +28,15 @@ const videoRouter = {
       name: "uploadVideo",
       meta: {
         title: "视频上传",
-        roles: ["admin", "common"],
+        roles: ["admin", "common"]
       }
     },
     {
-      path: "/permission/button/list",
-      name: "ListVideo",
+      path: "/uploads/img",
+      name: "uploadimg",
       meta: {
-        title: "视频列表",
-        roles: ["admin", "common"],
+        title: "图片上传",
+        roles: ["admin", "common"]
       }
     }
   ]

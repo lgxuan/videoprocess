@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/valid-v-for -->
 <template>
   <el-card shadow="never">
     <template #header>
@@ -5,201 +6,225 @@
         <span class="font-medium"> 视频处理 </span>
       </div>
     </template>
-    <div class="card" style="width: 100%">
-      <center>
-        <div id="beforeVideo" :v-if="data.videoPlayerDialog" />
-      </center>
-      <el-button
-        type="plain"
-        @click="onFormOneClick()"
-        style="width: 100%; margin-top: 10px"
-        plain
-        >选择处理视频</el-button
+    <center>
+      <div id="beforeVideo" :v-if="data.videoPlayerDialog" />
+    </center>
+
+    <el-form-item label="视频名搜索(模糊)">
+      <el-input
+        v-model="data.search"
+        class="!w-[220px]"
+        placeholder="输入要查询的视频名"
+      />
+    </el-form-item>
+    <el-form-item label="人物图片名搜搜(模糊)">
+      <el-input
+        v-model="data.searchPic"
+        class="!w-[220px]"
+        placeholder="输入要查询的图片名"
+      />
+    </el-form-item>
+    <el-form-item label="视频选择">
+      <el-select
+        v-model="data.selectedFile"
+        class="!w-[220px]"
+        placeholder="选择视频"
       >
-      <br />
+        <el-option
+          v-for="item in data.searchResult"
+          :label="item['src'] + ' time:' + formatDateToChinese(item['date'])"
+          :value="item['src']"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="人物图片选择">
+      <el-select
+        v-model="data.selectedpicFile"
+        class="!w-[220px]"
+        placeholder="选择图片"
+      >
+        <el-option
+          v-for="item in data.searchPicResult"
+          :label="item['leader'] + ' time:' + formatDateToChinese(item['date'])"
+          :value="item['leader']"
+        />
+      </el-select>
+    </el-form-item>
+    <el-button
+      @click="searchStart()"
+      style="width: 100%; margin-top: 10px"
+      plain
+      >搜索视频</el-button
+    >
+    <br />
+    <el-button
+      @click="searchPicStart()"
+      style="width: 100%; margin-top: 10px"
+      plain
+      >搜索人物图片</el-button
+    >
+    <br />
+    <el-button
+      type="primary"
+      @click="openVideo"
+      style="width: 100%; margin-top: 10px"
+      plain
+      >显示原视频</el-button
+    >
+    <br />
+    <el-button
+      type="primary"
+      @click="showViewer = true"
+      style="width: 100%; margin-top: 10px"
+      plain
+      >查看图片</el-button
+    >
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.rate_ck" label="倍数" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider
+            v-model="data.rate"
+            :format-tooltip="formatTooltip"
+            :min="1"
+            :max="100"
+          />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.brightness_ck" label="亮度" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider
+            v-model="data.brightness"
+            :format-tooltip="formatTooltip"
+            :min="-1000"
+            :max="1000"
+          />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.contrast_ck" label="对比度" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider
+            v-model="data.contrast"
+            :format-tooltip="formatTooltip"
+            :min="5"
+            :max="50"
+          />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.gray_ck" label="灰度" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider
+            v-model="data.gray"
+            :format-tooltip="formatTooltip"
+            :min="-100"
+            :max="100"
+          />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.whitening_ck" label="美白" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider v-model="data.whitening" :min="0" :max="100" />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.exfoliating_ck" label="磨皮" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-slider v-model="data.exfoliating" :min="0" :max="100" />
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.style_ck" label="风格" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-select v-model="data.style">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="item">
+      <el-row type="flex" :gutter="20">
+        <el-col :span="3" class="left-align">
+          <el-checkbox v-model="data.bubble_ck" label="泡泡" name="type" />
+        </el-col>
+        <el-col :span="21">
+          <el-select v-model="data.bubble">
+            <el-option
+              v-for="item in options_bubble"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+      </el-row>
+    </div>
+    <div style="display: block; width: 100%">
       <el-button
         type="primary"
-        @click="openVideo"
+        @click="transData()"
         style="width: 100%; margin-top: 10px"
         plain
-        >显示原视频</el-button
+        >提交处理</el-button
       >
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.rate_ck"
-              label="倍数"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider
-              v-model="data.rate"
-              :format-tooltip="formatTooltip"
-              :min="1"
-              :max="100"
-            />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.brightness_ck"
-              label="亮度"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider
-              v-model="data.brightness"
-              :format-tooltip="formatTooltip"
-              :min="-1000"
-              :max="1000"
-            />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.contrast_ck"
-              label="对比度"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider
-              v-model="data.contrast"
-              :format-tooltip="formatTooltip"
-              :min="5"
-              :max="50"
-            />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.gray_ck"
-              label="灰度"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider
-              v-model="data.gray"
-              :format-tooltip="formatTooltip"
-              :min="-100"
-              :max="100"
-            />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.whitening_ck"
-              label="美白"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider v-model="data.whitening" :min="0" :max="100" />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.exfoliating_ck"
-              label="磨皮"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-slider v-model="data.exfoliating" :min="0" :max="100" />
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.style_ck"
-              label="风格"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-select v-model="data.style">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              />
-            </el-select>
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row type="flex" :gutter="20">
-          <el-col :span="3" class="left-align">
-            <el-checkbox
-              v-model="data.bubble_ck"
-              label="泡泡"
-              name="type"
-            ></el-checkbox>
-          </el-col>
-          <el-col :span="21">
-            <el-select v-model="data.bubble">
-              <el-option
-                v-for="item in options_bubble"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-                :disabled="item.disabled"
-              />
-            </el-select>
-          </el-col>
-        </el-row>
-      </div>
-      <div style="display: block; width: 100%">
-        <el-button
-          type="primary"
-          @click="transData()"
-          style="width: 100%; margin-top: 10px"
-          plain
-          >提交处理</el-button
-        >
-        处理文件名称:{{ data.fileName }}
-        <!-- <el-button type="danger" plain @click="handleCheck()" :loading="data.isSending" style="width: 100%;margin-top:10px;translate:-12px;">进度查询</el-button> -->
-      </div>
-      <center>
-        <el-progress
-          :percentage="data.progress_num"
-          v-if="data.progress_num >= 0"
-          :status="data.progress_num >= 100 ? 'success' : ''"
-        />
-      </center>
-
-      <center>
-        <div id="afterVideo" v-if="data.progress_num >= 0" />
-      </center>
+      处理文件名称:{{ data.fileName }}
+      <!-- <el-button type="danger" plain @click="handleCheck()" :loading="data.isSending" style="width: 100%;margin-top:10px;translate:-12px;">进度查询</el-button> -->
     </div>
+    <center>
+      <el-progress
+        :percentage="data.progress_num"
+        v-if="data.progress_num >= 0"
+        :status="data.progress_num >= 100 ? 'success' : ''"
+      />
+    </center>
+
+    <center>
+      <div id="afterVideo" v-if="data.progress_num >= 0" />
+    </center>
   </el-card>
+  <ElImageViewer
+    v-if="showViewer"
+    :url-list="[fileBaseUri + data.selectedpicFile]"
+    @close="closeViewer"
+  />
 </template>
 
 <script setup lang="tsx">
-import { reactive, nextTick } from "vue";
+import { reactive, nextTick, onMounted, ref } from "vue";
 import {
   ElSlider,
   ElRow,
@@ -211,45 +236,41 @@ import {
   ElMessage
 } from "element-plus";
 import { fileBaseUri } from "../../api/utils";
+import { videoSearch } from "../../api/searchVideo";
+import { LeaderSearch } from "../../api/searchPic";
 import { setres, prores } from "../../api/process";
 import Player from "xgplayer";
-import forms, { type FormProps } from "./form.vue";
 import "xgplayer/dist/index.min.css";
-import { message } from "@/utils/message";
-import { addDialog } from "@/components/ReDialog";
-function onFormOneClick() {
-  addDialog({
-    width: "30%",
-    title: "选择你要处理的视频",
-    contentRenderer: () => forms,
-    props: {
-      // 赋默认值
-      formInline: {
-        user: "菜虚鲲",
-        region: "浙江"
-      }
-    },
-    closeCallBack: ({ options, args }) => {
-      // options.props 是响应式的
-      const { formInline } = options.props as FormProps;
-      const text = `姓名：${formInline.user} 城市：${formInline.region}`;
-      if (args?.command === "cancel") {
-        // 您点击了取消按钮
-        message(`您点击了取消按钮，当前表单数据为 ${text}`);
-      } else if (args?.command === "sure") {
-        message(`您点击了确定按钮，当前表单数据为 ${text}`);
-      } else {
-        message(`您点击了右上角关闭按钮或者空白页，当前表单数据为 ${text}`);
-      }
-    }
-  });
-}
+
+// 定义响应式数据
+const showViewer = ref(false);
+
+// 方法定义
+
+const closeViewer = () => {
+  showViewer.value = false;
+};
+onMounted(() => {
+  searchStart();
+  searchPicStart();
+});
+const formatDateToChinese = dateStr => {
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(date);
+};
 const openVideo = async () => {
   data.videoPlayerDialog = true;
   await nextTick();
   new Player({
     id: "beforeVideo",
-    url: fileBaseUri + "1.mp4",
+    url: fileBaseUri + data.selectedFile,
     lang: "zh",
     // 默认静音
     volume: 0,
@@ -257,12 +278,35 @@ const openVideo = async () => {
     error: "等待视频加载"
   });
 };
-
+const searchStart = () => {
+  videoSearch(data.search)
+    .then(function (response) {
+      data.searchResult = response;
+    })
+    .catch(function (_error) {
+      ElMessage({
+        message: "链接服务器异常！",
+        type: "warning"
+      });
+    });
+};
+const searchPicStart = () => {
+  LeaderSearch(data.searchPic)
+    .then(function (response) {
+      data.searchPicResult = response;
+    })
+    .catch(function (_error) {
+      ElMessage({
+        message: "链接服务器异常！",
+        type: "warning"
+      });
+    });
+};
 const checkProgress = () => {
-  let submitData = {
+  const submitData = {
     data: [
       {
-        src: "1.mp4",
+        src: data.selectedFile,
         dst: data.fileName
       }
     ]
@@ -271,7 +315,7 @@ const checkProgress = () => {
     .then(function (response) {
       data.progress_num = response["data"][0]["result"];
     })
-    .catch(function (error) {
+    .catch(function (_error) {
       ElMessage({
         message: "链接服务器异常！",
         type: "warning"
@@ -311,17 +355,6 @@ const transData = () => {
       console.log(error);
     });
 };
-//在按钮点击时，将isSending的值改为true
-const handleCheck = () => {
-  data.isSending = true;
-  tableList();
-};
-
-async function tableList() {
-  setTimeout(() => {
-    data.isSending = false;
-  }, 500);
-}
 
 const options = [
   {
@@ -369,21 +402,26 @@ const data = reactive({
   exfoliating_ck: false,
   isSending: false,
   fileName: "",
+  selectedFile: "",
+  search: "",
+  selectedpicFile: "",
+  searchPic: "",
+  searchResult: [],
+  searchPicResult: [],
   videoPlayerDialog: false,
   progress_num: -1
 });
 const getData = () => {
-  let result = {
+  const result = {
     data: [
       {
         type: "video",
-        src: "1.mp4",
-        leader: "leader.jpg"
+        src: data.selectedFile,
+        leader: data.selectedpicFile
       }
     ]
   };
-  let conunt = 0;
-  for (let key in data) {
+  for (const key in data) {
     if (key.endsWith("_ck") && data[key] === true) {
       const mainKey = key.slice(0, -3); // 删除 '_ck' 后缀来获取主键
       if (
@@ -404,17 +442,3 @@ const formatTooltip = val => {
   return val / 10;
 };
 </script>
-
-<style scoped>
-.car
-
-/* 默认样式，label在滑块的旁边 */
-.item .el-col:first-child {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.item {
-  margin-top: 5px;
-}
-</style>
